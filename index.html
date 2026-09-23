@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maquillaje Salomé | Tienda Oficial</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Montserrat & Playfair Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCvZ7NcGOwqMM6YWTYq1hevGGHTvtYdNdk",
+            authDomain: "salome-tienda.firebaseapp.com",
+            projectId: "salome-tienda",
+            storageBucket: "salome-tienda.appspot.com",
+            messagingSenderId: "926661747988",
+            appId: "1:926661747988:web:ad03d0a9e8c29c9f5b1591",
+            measurementId: "G-YRSHT996W1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.setDoc = setDoc;
+        window.doc = doc;
+        window.deleteDoc = deleteDoc;
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        salome: {
+                            rose: '#FCE7F0',
+                            softRose: '#FFF0F5',
+                            accent: '#E88DA7',
+                            gold: '#D4AF37',
+                            goldDark: '#AA820A',
+                            dark: '#2C222E',
+                            gray: '#786F7A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FFF0F5; }
+        ::-webkit-scrollbar-thumb { background: #E88DA7; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-salome-softRose text-salome-dark font-sans flex flex-col min-h-screen">
+
+    <!-- Encabezado / Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-salome-rose">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Nombre -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-salome-accent to-salome-gold flex items-center justify-center text-white text-xl font-bold font-serif shadow-md">
+                        S
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-serif font-bold tracking-wide text-salome-dark leading-tight">
+                            Salomé
+                        </h1>
+                        <p class="text-[10px] tracking-widest uppercase text-salome-gold font-semibold">Makeup & Care</p>
+                    </div>
+                </div>
+
+                <!-- Barra de búsqueda (Desktop) -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+                    <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Buscar base, labial, corrector..." 
+                        class="w-full pl-10 pr-4 py-2 text-sm bg-salome-softRose/60 border border-salome-rose rounded-full focus:outline-none focus:border-salome-accent focus:ring-1 focus:ring-salome-accent transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-salome-accent/70 text-sm"></i>
+                </div>
+
+                <!-- Acciones (Admin, Carrito) -->
+                <div class="flex items-center space-x-3">
+                    <button id="adminBtn" onclick="openAdminLogin()" class="px-3 py-2 rounded-full bg-salome-dark text-white hover:bg-salome-accent text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-lock"></i>
+                        <span class="hidden sm:inline">Admin</span>
+                    </button>
+                    <button id="cartBtn" onclick="openCartModal()" class="relative p-3 rounded-full bg-salome-rose/50 hover:bg-salome-rose text-salome-dark transition-all duration-300">
+                        <i class="fa-solid fa-bag-shopping text-xl text-salome-dark"></i>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-salome-gold text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Búsqueda móvil -->
+            <div class="pb-3 md:hidden">
+                <div class="relative w-full">
+                    <input type="text" id="searchInputMobile" oninput="filterProductsMobile()" placeholder="Buscar productos Salomé..." 
+                        class="w-full pl-10 pr-4 py-2 text-sm bg-salome-softRose/60 border border-salome-rose rounded-full focus:outline-none focus:border-salome-accent">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-salome-accent/70 text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner Principal / Hero -->
+    <section class="relative bg-gradient-to-r from-salome-rose via-salome-softRose to-white py-12 md:py-20 overflow-hidden border-b border-salome-rose/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="text-center md:text-left space-y-4">
+                    <span class="inline-block px-3 py-1 bg-salome-gold/20 text-salome-goldDark font-semibold text-xs rounded-full uppercase tracking-wider">
+                        Colección Original Salomé
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-salome-dark leading-tight">
+                        Resalta tu belleza natural con elegancia
+                    </h2>
+                    <p class="text-salome-gray text-sm md:text-base max-w-lg">
+                        Descubre nuestra selección exclusiva de maquillaje y cuidado facial de alta pigmentación y larga duración.
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+                        <a href="#catalogo" class="px-6 py-3 bg-salome-accent text-white font-medium rounded-full shadow-lg hover:bg-salome-accent/90 transition-all duration-300">
+                            Ver Productos
+                        </a>
+                        <a href="#categorias" class="px-6 py-3 border border-salome-accent text-salome-accent hover:bg-salome-rose font-medium rounded-full transition-all duration-300">
+                            Categorías
+                        </a>
+                    </div>
+                </div>
+                <div class="relative flex justify-center">
+                    <div class="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-tr from-salome-accent/30 to-salome-gold/30 absolute animate-pulse"></div>
+                    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=800&auto=format&fit=crop" 
+                         alt="Maquillaje Salomé Banner" 
+                         class="relative z-10 w-64 h-64 md:w-80 md:h-80 object-cover rounded-3xl shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenido Principal -->
+    <main id="catalogo" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        
+        <!-- Filtro por Categorías -->
+        <div id="categorias" class="mb-8">
+            <h3 class="text-xl font-serif font-bold text-salome-dark mb-4 text-center md:text-left">
+                Explorar por Categoría
+            </h3>
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 md:gap-3" id="categoryFilter">
+                <button onclick="filterCategory('Todos')" id="cat-Todos" class="category-btn bg-salome-accent text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-sm">
+                    Todos
+                </button>
+                <button onclick="filterCategory('Rostro')" id="cat-Rostro" class="category-btn bg-white text-salome-dark hover:bg-salome-rose px-5 py-2 rounded-full text-sm font-medium transition-all border border-salome-rose shadow-sm">
+                    Rostro
+                </button>
+                <button onclick="filterCategory('Ojos')" id="cat-Ojos" class="category-btn bg-white text-salome-dark hover:bg-salome-rose px-5 py-2 rounded-full text-sm font-medium transition-all border border-salome-rose shadow-sm">
+                    Ojos
+                </button>
+                <button onclick="filterCategory('Labios')" id="cat-Labios" class="category-btn bg-white text-salome-dark hover:bg-salome-rose px-5 py-2 rounded-full text-sm font-medium transition-all border border-salome-rose shadow-sm">
+                    Labios
+                </button>
+                <button onclick="filterCategory('Cuidado Facial')" id="cat-Cuidado Facial" class="category-btn bg-white text-salome-dark hover:bg-salome-rose px-5 py-2 rounded-full text-sm font-medium transition-all border border-salome-rose shadow-sm">
+                    Cuidado Facial
+                </button>
+            </div>
+        </div>
+
+        <!-- Grill de Productos -->
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Renderizado dinámico vía Firebase -->
+        </div>
+
+        <!-- Estado Vacío -->
+        <div id="noResults" class="hidden text-center py-16">
+            <i class="fa-solid fa-heart-crack text-4xl text-salome-accent/50 mb-3"></i>
+            <p class="text-salome-dark font-medium text-lg">No encontramos productos que coincidan.</p>
+            <p class="text-salome-gray text-sm mt-1">Intenta buscar otra palabra o cambiar de categoría.</p>
+        </div>
+    </main>
+
+    <!-- Modal Carrito -->
+    <div id="cartModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-4 border-b border-salome-rose pb-3">
+                    <h3 class="font-serif font-bold text-lg text-salome-dark">Tu Carrito de Compras</h3>
+                    <button onclick="closeCartModal()" class="text-salome-gray hover:text-salome-dark"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="cartItemsContainer" class="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+            <div class="border-t border-salome-rose pt-4 space-y-3">
+                <div class="space-y-2">
+                    <input type="text" id="client-name" placeholder="Nombre completo" class="w-full p-2.5 border border-salome-rose rounded-xl text-xs focus:outline-none focus:border-salome-accent">
+                    <input type="text" id="client-cedula" placeholder="Cédula" class="w-full p-2.5 border border-salome-rose rounded-xl text-xs focus:outline-none focus:border-salome-accent">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="client-estado" placeholder="Estado" class="w-full p-2.5 border border-salome-rose rounded-xl text-xs focus:outline-none focus:border-salome-accent">
+                        <input type="text" id="client-ciudad" placeholder="Ciudad" class="w-full p-2.5 border border-salome-rose rounded-xl text-xs focus:outline-none focus:border-salome-accent">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-sm font-semibold pt-1">
+                    <span class="text-salome-gray">Total a pagar:</span>
+                    <span id="cartTotal" class="font-bold text-salome-goldDark text-lg">$0.00</span>
+                </div>
+                <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm shadow-md transition-colors flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                    <span>Enviar Pedido por WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Administración de Productos -->
+    <div id="adminModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-salome-rose flex items-center justify-between bg-salome-softRose">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-user-shield text-salome-accent text-xl"></i>
+                    <h3 class="font-serif font-bold text-lg text-salome-dark">Panel Administrador</h3>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="changeAdminPassword()" class="text-xs text-salome-goldDark hover:underline font-semibold">
+                        <i class="fa-solid fa-key"></i> Cambiar Clave
+                    </button>
+                    <button onclick="closeAdmin()" class="p-2 text-salome-gray hover:text-salome-dark transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- Formulario Agregar/Editar -->
+                <form id="productForm" onsubmit="saveProduct(event)" class="bg-salome-softRose/40 p-4 rounded-xl border border-salome-rose/50 space-y-4">
+                    <h4 class="font-bold text-sm text-salome-dark uppercase tracking-wider" id="formHeader">Añadir Nuevo Producto</h4>
+                    <input type="hidden" id="editProductId">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Nombre del Producto *</label>
+                            <input type="text" id="prodName" required placeholder="Ej: Base Salomé Tono 2" class="w-full px-3 py-2 text-sm border border-salome-rose rounded-lg focus:outline-none focus:border-salome-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Categoría *</label>
+                            <select id="prodCategory" required class="w-full px-3 py-2 text-sm border border-salome-rose rounded-lg focus:outline-none focus:border-salome-accent bg-white">
+                                <option value="Rostro">Rostro</option>
+                                <option value="Ojos">Ojos</option>
+                                <option value="Labios">Labios</option>
+                                <option value="Cuidado Facial">Cuidado Facial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Precio ($) *</label>
+                            <input type="number" step="0.01" id="prodPrice" required placeholder="8.50" class="w-full px-3 py-2 text-sm border border-salome-rose rounded-lg focus:outline-none focus:border-salome-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Estado de Stock</label>
+                            <select id="prodAvailable" class="w-full px-3 py-2 text-sm border border-salome-rose rounded-lg focus:outline-none focus:border-salome-accent bg-white">
+                                <option value="Disponible">Disponible</option>
+                                <option value="Agotado">Agotado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Elegir Foto del Teléfono</label>
+                        <input type="file" id="prodImgFile" accept="image/*" class="w-full px-3 py-2 text-xs border border-salome-rose rounded-lg bg-white">
+                        <input type="hidden" id="prodImage">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-salome-gray mb-1">Descripción</label>
+                        <textarea id="prodDesc" rows="2" placeholder="Descripción breve del producto..." class="w-full px-3 py-2 text-sm border border-salome-rose rounded-lg focus:outline-none focus:border-salome-accent"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-2 bg-salome-accent text-white font-semibold rounded-lg hover:bg-salome-accent/90 transition-all text-sm shadow-sm">
+                        Guardar Producto
+                    </button>
+                </form>
+
+                <!-- Inventario Existente -->
+                <div>
+                    <h4 class="font-bold text-sm text-salome-dark uppercase tracking-wider mb-3">Lista de Productos Actuales</h4>
+                    <div id="adminProductsList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Carga dinámica -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-salome-dark text-white mt-12 py-8 border-t border-salome-gold/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+            <div class="flex items-center justify-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-salome-gold flex items-center justify-center text-white font-serif font-bold text-sm">S</div>
+                <span class="font-serif font-bold text-xl tracking-wide">Maquillaje Salomé</span>
+            </div>
+            <p class="text-salome-rose/70 text-xs md:text-sm max-w-md mx-auto">
+                Belleza que resalta tu esencia. Productos originales de maquillaje y cuidado personal.
+            </p>
+            <div class="flex justify-center space-x-4 text-sm text-salome-gold pt-2">
+                <a href="https://wa.me/584244223469" target="_blank" class="hover:text-white transition-colors">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> +58 0424 4223469
+                </a>
+            </div>
+            <p class="text-[11px] text-white/40 pt-4">
+                &copy; <span id="yearSpan"></span> Maquillaje Salomé. Todos los derechos reservados.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Script principal con Firebase Firestore -->
+    <script>
+        let products = [];
+        let cart = [];
+        let activeCategory = 'Todos';
+        let searchQuery = '';
+
+        const defaultProducts = [
+            { id: '1', name: "Base Líquida Salomé Matte Finish", category: "Rostro", price: 8.50, description: "Cobertura media a alta con acabado mate de larga duración.", image: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?q=80&w=500&auto=format&fit=crop", status: "Disponible" },
+            { id: '2', name: "Corrector de Alta Cobertura Salomé", category: "Rostro", price: 5.00, description: "Cubre imperfecciones y ojeras sin agrietar la piel.", image: "https://images.unsplash.com/photo-1599733589046-10c005739ef9?q=80&w=500&auto=format&fit=crop", status: "Disponible" },
+            { id: '3', name: "Paleta de Sombras 'Rose Gold' Salomé", category: "Ojos", price: 12.00, description: "12 tonos ultrapigmentados entre mates y satinados.", image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=500&auto=format&fit=crop", status: "Disponible" }
+        ];
+
+        document.getElementById('yearSpan').textContent = new Date().getFullYear();
+
+        async function loadProducts() {
+            try {
+                const querySnapshot = await window.getDocs(window.collection(window.db, "productos"));
+                products = [];
+                querySnapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (products.length === 0) {
+                    for (let p of defaultProducts) {
+                        await window.setDoc(window.doc(window.db, "productos", p.id), p);
+                    }
+                    products = defaultProducts;
+                }
+            } catch (e) {
+                console.log("Usando productos locales por error de red:", e);
+                products = defaultProducts;
+            }
+            renderProducts();
+            renderAdminList();
+        }
+
+        function renderProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const noResults = document.getElementById('noResults');
+
+            const filtered = products.filter(product => {
+                const matchesCategory = activeCategory === 'Todos' || product.category === activeCategory;
+                const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                productsGrid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            productsGrid.innerHTML = filtered.map(product => {
+                const isAvailable = product.status !== 'Agotado';
+                return `
+                <div class="bg-white rounded-2xl overflow-hidden border border-salome-rose/60 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group ${!isAvailable ? 'opacity-75' : ''}">
+                    <div class="relative overflow-hidden bg-salome-softRose aspect-square">
+                        <img src="${product.image || 'https://placehold.co/400x400/FCE7F0/2C222E?text=Maquillaje+Salome'}" alt="${product.name}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x400/FCE7F0/2C222E?text=Maquillaje+Salome';">
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-salome-dark text-[11px] font-semibold px-2.5 py-1 rounded-full border border-salome-rose">
+                            ${product.category}
+                        </span>
+                        ${!isAvailable ? `
+                            <span class="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                                Agotado
+                            </span>
+                        ` : ''}
+                    </div>
+                    <div class="p-5 flex flex-col flex-1 justify-between space-y-3">
+                        <div>
+                            <h4 class="font-serif font-bold text-salome-dark text-base leading-snug group-hover:text-salome-accent transition-colors">
+                                ${product.name}
+                            </h4>
+                            <p class="text-salome-gray text-xs mt-1.5 line-clamp-2 leading-relaxed">
+                                ${product.description || ''}
+                            </p>
+                        </div>
+                        <div class="pt-2 flex items-center justify-between border-t border-salome-rose/40">
+                            <span class="text-lg font-bold text-salome-goldDark">
+                                $${parseFloat(product.price).toFixed(2)}
+                            </span>
+                            ${isAvailable ? `
+                                <button onclick="addToCart('${product.id}')" 
+                                        class="px-4 py-2 bg-salome-accent hover:bg-salome-accent/90 text-white text-xs font-semibold rounded-full shadow-sm hover:shadow-md transition-all flex items-center space-x-1.5 active:scale-95">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                    <span>Añadir</span>
+                                </button>
+                            ` : `
+                                <button disabled class="px-3 py-1.5 bg-gray-200 text-gray-500 text-xs font-semibold rounded-full cursor-not-allowed">
+                                    Agotado
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function filterCategory(category) {
+            activeCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('bg-salome-accent', 'text-white');
+                btn.classList.add('bg-white', 'text-salome-dark', 'border', 'border-salome-rose');
+            });
+            const activeBtn = document.getElementById(`cat-${category}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-salome-accent', 'text-white');
+                activeBtn.classList.remove('bg-white', 'text-salome-dark', 'border', 'border-salome-rose');
+            }
+            renderProducts();
+        }
+
+        function filterProducts() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderProducts();
+        }
+
+        function filterProductsMobile() {
+            searchQuery = document.getElementById('searchInputMobile').value;
+            renderProducts();
+        }
+
+        // Gestión del Carrito
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            updateCartCount();
+            alert(`¡"${product.name}" agregado al carrito!`);
+        }
+
+        function updateCartCount() {
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').innerText = totalCount;
+        }
+
+        function openCartModal() {
+            const container = document.getElementById('cartItemsContainer');
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-salome-gray text-sm py-6">Tu carrito está vacío</p>';
+            } else {
+                cart.forEach((item, index) => {
+                    const subtotal = item.price * item.quantity;
+                    total += subtotal;
+                    container.innerHTML += `
+                        <div class="flex items-center justify-between bg-salome-softRose/50 p-3 rounded-xl border border-salome-rose text-sm">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.image}" class="w-10 h-10 object-cover rounded-lg">
+                                <div>
+                                    <h4 class="font-bold text-salome-dark text-xs line-clamp-1">${item.name}</h4>
+                                    <p class="text-salome-gray text-xs">$${Number(item.price).toFixed(2)} x ${item.quantity}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-salome-goldDark text-xs">$${subtotal.toFixed(2)}</span>
+                                <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function closeCartModal() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartCount();
+            openCartModal();
+        }
+
+        function checkoutWhatsApp() {
+            if (cart.length === 0) {
+                alert("El carrito está vacío");
+                return;
+            }
+
+            const name = document.getElementById('client-name').value.trim();
+            const cedula = document.getElementById('client-cedula').value.trim();
+            const estado = document.getElementById('client-estado').value.trim();
+            const ciudad = document.getElementById('client-ciudad').value.trim();
+
+            if (!name || !cedula || !estado || !ciudad) {
+                alert("Por favor completa todos tus datos (Nombre, Cédula, Estado y Ciudad).");
+                return;
+            }
+
+            const phone = "584244223469"; // Número oficial vinculado
+            let text = `Hola, ¡quiero hacer un pedido en Maquillaje Salomé!%0A%0A`;
+            text += `👤 *Cliente:* ${name}%0A`;
+            text += `🪪 *Cédula:* ${cedula}%0A`;
+            text += `📍 *Estado:* ${estado} | *Ciudad:* ${ciudad}%0A%0A`;
+            text += `🛍️ *Productos:*%0A`;
+
+            let total = 0;
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                text += `- ${item.name} (x${item.quantity}) - $${subtotal.toFixed(2)}%0A`;
+            });
+            text += `%0A💰 *Total a pagar: $${total.toFixed(2)}*`;
+            
+            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        }
+
+        // Panel Admin Seguro
+        function openAdminLogin() {
+            const currentPass = localStorage.getItem('salome_admin_pass') || '3110';
+            const inputPass = prompt("Ingresa la clave de Administrador:");
+            if (inputPass === currentPass) {
+                document.getElementById('adminModal').classList.remove('hidden');
+                renderAdminList();
+            } else if (inputPass !== null) {
+                alert("Contraseña incorrecta");
+            }
+        }
+
+        function changeAdminPassword() {
+            const currentPass = localStorage.getItem('salome_admin_pass') || '3110';
+            const oldPass = prompt("Ingresa tu clave actual:");
+            if (oldPass === currentPass) {
+                const newPass = prompt("Ingresa la nueva clave de administrador:");
+                if (newPass && newPass.trim() !== "") {
+                    localStorage.setItem('salome_admin_pass', newPass.trim());
+                    alert("¡Contraseña actualizada con éxito!");
+                }
+            } else if (oldPass !== null) {
+                alert("Clave actual incorrecta.");
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminModal').classList.add('hidden');
+            document.getElementById('productForm').reset();
+            document.getElementById('editProductId').value = '';
+            document.getElementById('formHeader').textContent = "Añadir Nuevo Producto";
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('adminProductsList');
+            list.innerHTML = '';
+            products.forEach(p => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between p-2.5 bg-salome-softRose/30 rounded-xl border border-salome-rose text-sm">
+                        <div class="flex items-center gap-2 truncate">
+                            <img src="${p.image}" class="w-8 h-8 rounded-lg object-cover">
+                            <span class="font-medium text-salome-dark truncate">${p.name}</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="editProduct('${p.id}')" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteProduct('${p.id}')" class="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('editProductId').value || Date.now().toString();
+            let imageUrl = document.getElementById('prodImage').value;
+            const fileInput = document.getElementById('prodImgFile');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(uploadEvent) {
+                    imageUrl = uploadEvent.target.result;
+                    await commitProductToFirebase(id, imageUrl);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                await commitProductToFirebase(id, imageUrl);
+            }
+        }
+
+        async function commitProductToFirebase(id, imageUrl) {
+            const productData = {
+                name: document.getElementById('prodName').value,
+                category: document.getElementById('prodCategory').value,
+                price: parseFloat(document.getElementById('prodPrice').value),
+                image: imageUrl || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500',
+                description: document.getElementById('prodDesc').value,
+                status: document.getElementById('prodAvailable').value
+            };
+
+            try {
+                await window.setDoc(window.doc(window.db, "productos", id), productData);
+                alert("¡Guardado exitosamente para todo el mundo!");
+                closeAdmin();
+                loadProducts(); // <-- Vuelve a cargar los datos de Firebase y actualiza la pantalla
+            } catch (err) {
+                alert("Error al guardar en Firebase: " + err.message);
+            }
+        }
+
+        function editProduct(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodCategory').value = p.category;
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodImage').value = p.image;
+            document.getElementById('prodDesc').value = p.description || '';
+            document.getElementById('prodAvailable').value = p.status || 'Disponible';
+            document.getElementById('formHeader').textContent = "Editar Producto";
+        }
+
+        async function deleteProduct(id) {
+            if (confirm("¿Estás seguro de eliminar este producto? Se borrará para todo el mundo.")) {
+                try {
+                    await window.deleteDoc(window.doc(window.db, "productos", id));
+                    alert("Producto eliminado exitosamente.");
+                    await loadProducts(); // <-- ¡AQUÍ ESTABA EL DETALLE! Recarga la lista completa desde Firebase y refresca la pantalla al instante.
+                } catch (err) {
+                    alert("Error al eliminar");
+                }
+            }
+        }
+
+        window.onload = loadProducts;
+    </script>
+</body>
+</html>
